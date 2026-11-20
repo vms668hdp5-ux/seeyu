@@ -499,7 +499,7 @@
           headInput.value = col.label;
           headInput.setAttribute('aria-label', '列ヘッダー');
           headInput.className =
-            'export-clean-input w-full text-center text-xs sm:text-sm font-bold text-[#111111] bg-transparent py-0.5 focus:outline-none';
+            'export-header-input export-clean-input w-full text-center text-xs sm:text-sm font-bold text-[#111111] bg-transparent py-0.5 focus:outline-none';
           headInput.addEventListener('input', (e) => {
             appState.columns[col.colIndex].label = e.target.value;
           });
@@ -900,7 +900,15 @@
         const canvas = await html2canvas(captureTarget, {
           scale: 2,
           backgroundColor: '#FFFFFF',
-          useCORS: true
+          useCORS: true,
+          onclone: (clonedDocument) => {
+            clonedDocument.querySelectorAll('#capture-target .export-header-input').forEach((input) => {
+              const label = clonedDocument.createElement('span');
+              label.className = `${input.className} block`;
+              label.textContent = input.value;
+              input.replaceWith(label);
+            });
+          }
         });
 
         const pngBlob = await new Promise((resolve, reject) => {
