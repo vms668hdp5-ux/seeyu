@@ -152,7 +152,7 @@
             id="table-title-input"
             value="第一印象と今の印象比較表"
             placeholder="表のタイトルを入力..."
-            class="export-clean-input w-full max-w-md text-center text-lg sm:text-xl font-bold text-[#111111] bg-transparent py-0.5 focus:outline-none"
+            class="export-title-input export-clean-input w-full max-w-md text-center text-lg sm:text-xl font-bold text-[#111111] bg-transparent py-0.5 focus:outline-none"
           />
         </div>
 
@@ -357,7 +357,7 @@
      */
     function buildInitialState() {
       return {
-        showTitle: false,
+        showTitle: true,
         titleText: '第一印象と今の印象比較表',
         showMemo: false,
         memoText: '',
@@ -902,12 +902,14 @@
           backgroundColor: '#FFFFFF',
           useCORS: true,
           onclone: (clonedDocument) => {
-            clonedDocument.querySelectorAll('#capture-target .export-header-input').forEach((input) => {
-              const label = clonedDocument.createElement('span');
-              label.className = `${input.className} block`;
-              label.textContent = input.value;
-              input.replaceWith(label);
-            });
+            clonedDocument
+              .querySelectorAll('#capture-target .export-header-input, #capture-target .export-title-input')
+              .forEach((input) => {
+                const label = clonedDocument.createElement('span');
+                label.className = `${input.className} block`;
+                label.textContent = input.value;
+                input.replaceWith(label);
+              });
           }
         });
 
