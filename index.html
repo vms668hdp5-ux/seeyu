@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>第一印象・今の印象 比較表メーカー</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- html2canvas (高画質PNG書き出し用) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Google Fonts (丸ゴシック固定) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* 丸ゴシック固定・白背景（#FFFFFF）・黒文字（#111111）・枠線なし固定 */
+    body,
+    .rounded-gothic-fixed {
+      font-family: 'Zen Maru Gothic', 'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', 'YuGothic', sans-serif;
+    }
+
+    /* スクロールバーの見た目を整える */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    /* 選択中セルのハイライト（編集中のみ表示） */
+    .cell-selected {
+      box-shadow: 0 0 0 3px #111111 !important;
+    }
+
+    /* PNG書き出しモード時：編集用ボタン・ガイド・空枠装飾を非表示にし、枠線なし＆白背景を徹底 */
+    .exporting-mode,
+    .exporting-mode * {
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .exporting-mode .no-export {
+      display: none !important;
+    }
+    .exporting-mode .export-hide-cell {
+      display: none !important;
+    }
+    .exporting-mode .empty-cell-guide {
+      display: none !important;
+    }
+    .exporting-mode .empty-cell-box {
+      background-color: #ffffff !important;
+    }
+    .exporting-mode input::placeholder,
+    .exporting-mode textarea::placeholder {
+      color: transparent !important;
+    }
+    .exporting-mode .export-clean-input {
+      background-color: transparent !important;
+    }
+  </style>
+</head>
+<body class="bg-neutral-100 text-[#111111] rounded-gothic-fixed min-h-screen flex flex-col">
+
+  <!-- 上部コントロールバー -->
+  <header class="bg-white border-b border-neutral-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-[#111111] text-white flex items-center justify-center shrink-0">
+          <i data-lucide="columns-3" class="w-5 h-5"></i>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-sm sm:text-base font-bold text-[#111111] truncate">第一印象・今の印象 比較表メーカー</h1>
+          <p class="text-[11px] text-neutral-500 hidden sm:block">丸ゴシック・枠なし・白背景固定 / クリック・D&amp;D・Ctrl+Vで画像追加</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <button id="btn-add-1-top" type="button" class="px-3 py-2 text-xs sm:text-sm font-bold text-[#111111] bg-neutral-100 hover:bg-neutral-200 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
+          <span>+1人追加</span>
+        </button>
+
+        <button id="btn-add-5-top" type="button" class="px-3 py-2 text-xs sm:text-sm font-bold text-[#111111] bg-neutral-100 hover:bg-neutral-200 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>+5人追加</span>
+        </button>
+
+        <button id="btn-reset" type="button" class="px-3 py-2 text-xs sm:text-sm font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span>リセット</span>
+        </button>
+
+        <button id="btn-export-png" type="button" class="px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#111111] hover:bg-neutral-800 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="image-down" class="w-4 h-4"></i>
+          <span>画像として保存 (PNG)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- サブバー：+α列の表示切替＆全体タイトル/メモの任意表示切替 -->
+    <div class="bg-neutral-50 border-t border-neutral-200/80">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-4 flex-wrap">
+          <label class="inline-flex items-center gap-1.5 cursor-pointer select-none font-bold text-[#111111]">
+            <input type="checkbox" id="toggle-alpha-col" checked class="rounded accent-[#111111] w-4 h-4 cursor-pointer" />
+            <span>「今の印象 +α」列を表示</span>
+          </label>
+
+          <label class="inline-flex items-center gap-1.5 cursor-pointer select-none font-medium text-neutral-700">
+            <input type="checkbox" id="toggle-header-title" class="rounded accent-[#111111] w-4 h-4 cursor-pointer" />
+            <span>表タイトル欄</span>
+          </label>
+
+          <label class="inline-flex items-center gap-1.5 cursor-pointer select-none font-medium text-neutral-700">
+            <input type="checkbox" id="toggle-footer-memo" class="rounded accent-[#111111] w-4 h-4 cursor-pointer" />
+            <span>全体メモ欄</span>
+          </label>
+        </div>
+
+        <div id="row-count-badge" class="text-neutral-600 font-bold">
+          現在 6 人分
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- メイン作業＆横スクロール対応プレビュー領域（左端の一列目が隠れないよう左詰めスクロール） -->
+  <main class="flex-1 w-full overflow-x-auto py-3 px-2 sm:px-4">
+    <div class="w-max min-w-full flex flex-col items-start sm:items-center">
+      <!-- 白背景（#FFFFFF）・黒文字（#111111）・枠線なし固定の比較表キャンバス -->
+      <div id="capture-target" class="bg-[#FFFFFF] text-[#111111] rounded-gothic-fixed p-3 sm:p-4 rounded-xl shrink-0">
+        <!-- 任意：表タイトル -->
+        <div id="table-title-section" class="hidden mb-3 text-center">
+          <input
+            type="text"
+            id="table-title-input"
+            value="第一印象と今の印象比較表"
+            placeholder="表のタイトルを入力..."
+            class="export-clean-input w-full max-w-md text-center text-lg sm:text-xl font-bold text-[#111111] bg-transparent py-0.5 focus:outline-none"
+          />
+        </div>
+
+        <!-- 比較表グリッド -->
+        <div id="matrix-container" class="flex flex-col gap-2.5 sm:gap-3"></div>
+
+        <!-- 任意：全体メモ欄 -->
+        <div id="table-memo-section" class="hidden mt-3 pt-1">
+          <textarea
+            id="table-memo-input"
+            rows="2"
+            placeholder="全体の感想やメモを入力..."
+            class="export-clean-input w-full text-xs text-[#111111] bg-neutral-50 rounded-lg px-2.5 py-1.5 focus:outline-none resize-none"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- 表下部からの追加ボタン（書き出しには含まれない） -->
+      <div class="mt-3 flex items-center justify-start sm:justify-center gap-2 flex-wrap">
+        <button id="btn-add-1-bottom" type="button" class="px-3 py-1.5 text-xs font-bold text-[#111111] bg-white hover:bg-neutral-50 border border-neutral-300 rounded-lg transition flex items-center gap-1 cursor-pointer">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span>+1人追加</span>
+        </button>
+
+        <button id="btn-add-5-bottom" type="button" class="px-3 py-1.5 text-xs font-bold text-[#111111] bg-white hover:bg-neutral-50 border border-neutral-300 rounded-lg transition flex items-center gap-1 cursor-pointer">
+          <i data-lucide="users" class="w-3.5 h-3.5"></i>
+          <span>+5人追加</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 隠しファイル選択インプット -->
+  <input type="file" id="file-picker" accept="image/*" class="hidden" />
+
+  <!-- 画像微調整モーダル -->
+  <div id="adjust-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-3">
+    <div class="bg-white text-[#111111] rounded-gothic-fixed rounded-xl max-w-sm w-full p-4 shadow-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-bold flex items-center gap-1.5">
+          <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+          <span>画像の表示調整</span>
+        </h2>
+        <button type="button" id="btn-close-modal" class="p-1 rounded-lg text-neutral-500 hover:bg-neutral-100 cursor-pointer" aria-label="閉じる">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- 表示方法切替（枠いっぱい / 全体表示） -->
+      <div class="mb-3">
+        <span class="block text-[11px] font-bold text-neutral-700 mb-1">表示方法</span>
+        <div class="grid grid-cols-2 gap-1.5 bg-neutral-100 p-1 rounded-lg">
+          <button type="button" data-fit-mode="cover" class="fit-mode-btn py-1 px-2 rounded-md text-[11px] font-bold transition cursor-pointer">
+            枠いっぱい
+          </button>
+          <button type="button" data-fit-mode="contain" class="fit-mode-btn py-1 px-2 rounded-md text-[11px] font-bold transition cursor-pointer">
+            全体表示
+          </button>
+        </div>
+      </div>
+
+      <!-- プレビュー枠 -->
+      <div class="flex justify-center mb-3 bg-neutral-100 py-2.5 rounded-lg">
+        <div class="w-32 h-32 bg-[#FFFFFF] overflow-hidden relative rounded-lg">
+          <img id="modal-preview-img" src="" alt="プレビュー" class="w-full h-full pointer-events-none origin-center" />
+        </div>
+      </div>
+
+      <!-- ズーム / X / Y / 回転 スライダー -->
+      <div class="space-y-2 text-[11px]">
+        <div>
+          <div class="flex justify-between font-bold mb-0.5">
+            <span>ズーム（拡大・縮小）</span>
+            <span id="label-zoom">100%</span>
+          </div>
+          <input type="range" id="range-zoom" min="50" max="250" value="100" class="w-full accent-[#111111] cursor-pointer h-1.5" />
+        </div>
+
+        <div>
+          <div class="flex justify-between font-bold mb-0.5">
+            <span>左右の位置（X）</span>
+            <span id="label-offset-x">0px</span>
+          </div>
+          <input type="range" id="range-offset-x" min="-120" max="120" value="0" class="w-full accent-[#111111] cursor-pointer h-1.5" />
+        </div>
+
+        <div>
+          <div class="flex justify-between font-bold mb-0.5">
+            <span>上下の位置（Y）</span>
+            <span id="label-offset-y">0px</span>
+          </div>
+          <input type="range" id="range-offset-y" min="-120" max="120" value="0" class="w-full accent-[#111111] cursor-pointer h-1.5" />
+        </div>
+
+        <div>
+          <div class="flex justify-between font-bold mb-0.5">
+            <span>回転</span>
+            <span id="label-rotate">0°</span>
+          </div>
+          <input type="range" id="range-rotate" min="-180" max="180" value="0" class="w-full accent-[#111111] cursor-pointer h-1.5" />
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mt-3.5 pt-2.5 border-t border-neutral-200">
+        <button type="button" id="btn-reset-adjust" class="px-2.5 py-1.5 text-[11px] font-bold text-neutral-600 hover:bg-neutral-100 rounded-lg transition cursor-pointer">
+          調整を戻す
+        </button>
+        <button type="button" id="btn-apply-adjust" class="px-4 py-1.5 text-[11px] font-bold text-white bg-[#111111] hover:bg-neutral-800 rounded-lg transition cursor-pointer">
+          反映する
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- リセット確認モーダル -->
+  <div id="reset-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-3">
+    <div class="bg-white text-[#111111] rounded-gothic-fixed rounded-xl max-w-xs w-full p-4 shadow-2xl">
+      <h2 class="text-sm font-bold mb-1.5">比較表をリセットしますか？</h2>
+      <p class="text-[11px] text-neutral-600 mb-4 leading-relaxed">
+        配置した画像や入力したテキストはすべて消去され、初期状態（6人分）に戻ります。
+      </p>
+      <div class="flex justify-end gap-2">
+        <button type="button" id="btn-cancel-reset" class="px-3 py-1.5 text-[11px] font-bold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-lg cursor-pointer">
+          キャンセル
+        </button>
+        <button type="button" id="btn-confirm-reset" class="px-3 py-1.5 text-[11px] font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg cursor-pointer">
+          リセットする
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 画面下部トースト通知 -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-[#111111] text-white text-xs font-bold px-3 py-2 rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50">
+    <span id="toast-text"></span>
+  </div>
+
+  <script>
+    /**
+     * 1セル分のデータ構造を生成
+     */
+    function createEmptyCell(caption = '') {
+      return {
+        imageData: null,
+        fit: 'cover', // 'cover'（枠いっぱい） | 'contain'（全体表示）
+        zoom: 100,
+        offsetX: 0,
+        offsetY: 0,
+        rotate: 0,
+        caption: caption
+      };
+    }
+
+    /**
+     * 1人分（1行）のデータ構造を生成（4列分のセルを保持）
+     */
+    function createPersonRow() {
+      return {
+        id: 'person-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+        cells: [
+          createEmptyCell(''), // 0: アイコン / CV
+          createEmptyCell(''), // 1: 第一印象
+          createEmptyCell(''), // 2: 今の印象
+          createEmptyCell('')  // 3: 今の印象 +α
+        ]
+      };
+    }
+
+    /**
+     * 初期状態（6人分＝6行、列は「アイコン / CV」「第一印象」「今の印象」「今の印象 +α」）
+     */
+    function buildInitialState() {
+      return {
+        showTitle: false,
+        titleText: '第一印象と今の印象比較表',
+        showMemo: false,
+        memoText: '',
+        columns: [
+          { key: 'iconCv', label: 'アイコン / CV', visible: true },
+          { key: 'first', label: '第一印象', visible: true },
+          { key: 'current', label: '今の印象', visible: true },
+          { key: 'alpha', label: '今の印象 +α', visible: true }
+        ],
+        rows: Array.from({ length: 6 }, () => createPersonRow())
+      };
+    }
+
+    let appState = buildInitialState();
+    let selectedCell = { rowIndex: 0, colIndex: 0 };
+    let pendingUploadTarget = null;
+    let modalTargetCell = null;
+    let modalDraft = null;
+    let toastTimer = null;
+
+    // DOM参照
+    const captureTarget = document.getElementById('capture-target');
+    const matrixContainer = document.getElementById('matrix-container');
+    const filePicker = document.getElementById('file-picker');
+    const rowCountBadge = document.getElementById('row-count-badge');
+
+    const titleSection = document.getElementById('table-title-section');
+    const titleInput = document.getElementById('table-title-input');
+    const memoSection = document.getElementById('table-memo-section');
+    const memoInput = document.getElementById('table-memo-input');
+
+    const adjustModal = document.getElementById('adjust-modal');
+    const modalPreviewImg = document.getElementById('modal-preview-img');
+    const rangeZoom = document.getElementById('range-zoom');
+    const rangeOffsetX = document.getElementById('range-offset-x');
+    const rangeOffsetY = document.getElementById('range-offset-y');
+    const rangeRotate = document.getElementById('range-rotate');
+    const labelZoom = document.getElementById('label-zoom');
+    const labelOffsetX = document.getElementById('label-offset-x');
+    const labelOffsetY = document.getElementById('label-offset-y');
+    const labelRotate = document.getElementById('label-rotate');
+
+    const resetModal = document.getElementById('reset-modal');
+
+    /**
+     * トースト通知を表示
+     */
+    function showToast(message) {
+      const toastEl = document.getElementById('toast');
+      const toastText = document.getElementById('toast-text');
+      toastText.textContent = message;
+      toastEl.classList.remove('opacity-0');
+      toastEl.classList.add('opacity-100');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastEl.classList.remove('opacity-100');
+        toastEl.classList.add('opacity-0');
+      }, 2200);
+    }
+
+    /**
+     * セル画像の CSS スタイルを生成
+     */
+    function getCellImageStyle(cell) {
+      const objectFitClass = cell.fit === 'contain' ? 'object-contain' : 'object-cover';
+      const transformValue = `translate(${cell.offsetX}px, ${cell.offsetY}px) scale(${cell.zoom / 100}) rotate(${cell.rotate}deg)`;
+      return { objectFitClass, transformValue };
+    }
+
+    /**
+     * ツールバー表示を状態と同期
+     */
+    function syncHeaderControls() {
+      rowCountBadge.textContent = `現在 ${appState.rows.length} 人分`;
+
+      const alphaCol = appState.columns.find((c) => c.key === 'alpha');
+      document.getElementById('toggle-alpha-col').checked = alphaCol ? alphaCol.visible : true;
+
+      document.getElementById('toggle-header-title').checked = appState.showTitle;
+      titleSection.classList.toggle('hidden', !appState.showTitle);
+      titleInput.value = appState.titleText;
+
+      document.getElementById('toggle-footer-memo').checked = appState.showMemo;
+      memoSection.classList.toggle('hidden', !appState.showMemo);
+      memoInput.value = appState.memoText;
+    }
+
+    /**
+     * 比較表全体を描画
+     * 明示的な CSS Grid (`gridTemplateColumns: repeat(N, minmax(140px, 1fr))`) と行操作ボタンの分離で
+     * 左端の一列目（「アイコン / CV」）が隠れず整列するように描画する。
+     */
+    function renderMatrix() {
+      try {
+        syncHeaderControls();
+        matrixContainer.innerHTML = '';
+
+        const visibleCols = appState.columns
+          .map((col, index) => ({ ...col, colIndex: index }))
+          .filter((col) => col.visible);
+
+        const colCount = Math.max(visibleCols.length, 1);
+        const gridTemplate = `repeat(${colCount}, minmax(96px, 118px))`;
+
+        // 1. 列ヘッダー行
+        const headerRow = document.createElement('div');
+        headerRow.className = 'flex items-center gap-2 sm:gap-2.5';
+
+        const headerGrid = document.createElement('div');
+        headerGrid.className = 'grid gap-2 sm:gap-2.5 flex-1';
+        headerGrid.style.gridTemplateColumns = gridTemplate;
+
+        visibleCols.forEach((col) => {
+          const colHead = document.createElement('div');
+          colHead.className = 'w-full min-w-[96px] text-center';
+          if (col.key === 'alpha') {
+            colHead.dataset.alphaCol = 'true';
+          }
+
+          const headInput = document.createElement('input');
+          headInput.type = 'text';
+          headInput.value = col.label;
+          headInput.setAttribute('aria-label', '列ヘッダー');
+          headInput.className =
+            'export-clean-input w-full text-center text-xs sm:text-sm font-bold text-[#111111] bg-transparent py-0.5 focus:outline-none';
+          headInput.addEventListener('input', (e) => {
+            appState.columns[col.colIndex].label = e.target.value;
+          });
+
+          colHead.appendChild(headInput);
+          headerGrid.appendChild(colHead);
+        });
+
+        // 右側の行操作ボタン列幅と合わせるためのスペーサー（PNG書き出し時は非表示）
+        const headerActionSpacer = document.createElement('div');
+        headerActionSpacer.className = 'w-6 shrink-0 no-export';
+
+        headerRow.appendChild(headerGrid);
+        headerRow.appendChild(headerActionSpacer);
+        matrixContainer.appendChild(headerRow);
+
+        // 2. 各人の行を描画（左端から「アイコン / CV」列が必ず先頭に配置される）
+        appState.rows.forEach((row, rowIndex) => {
+          const rowEl = document.createElement('div');
+          rowEl.className = 'flex items-start gap-2 sm:gap-2.5';
+          rowEl.dataset.rowIndex = String(rowIndex);
+
+          const rowGrid = document.createElement('div');
+          rowGrid.className = 'grid gap-2 sm:gap-2.5 flex-1';
+          rowGrid.style.gridTemplateColumns = gridTemplate;
+
+          visibleCols.forEach((col) => {
+            const cell = row.cells[col.colIndex];
+            const isSelected =
+              selectedCell.rowIndex === rowIndex && selectedCell.colIndex === col.colIndex;
+
+            const cellColumn = document.createElement('div');
+            cellColumn.className = 'w-full min-w-[96px] flex flex-col gap-1';
+            if (col.key === 'alpha') {
+              cellColumn.dataset.alphaCol = 'true';
+            }
+
+            // 正方形画像ボックス（枠線なし固定・コンパクトサイズ）
+            const imageBox = document.createElement('div');
+            imageBox.className = `empty-cell-box relative aspect-square w-full overflow-hidden bg-[#FFFFFF] rounded-lg select-none transition-shadow ${
+              isSelected ? 'cell-selected' : ''
+            }`;
+
+            // セルクリックで選択（空セルを再クリックした場合はファイル選択を開く）
+            imageBox.addEventListener('click', (e) => {
+              if (e.target.closest('button')) return;
+              const wasAlreadySelected =
+                selectedCell.rowIndex === rowIndex && selectedCell.colIndex === col.colIndex;
+              selectedCell = { rowIndex, colIndex: col.colIndex };
+
+              if (!cell.imageData && wasAlreadySelected) {
+                pendingUploadTarget = { rowIndex, colIndex: col.colIndex };
+                filePicker.value = '';
+                filePicker.click();
+              } else {
+                renderMatrix();
+              }
+            });
+
+            // ドラッグ＆ドロップ対応
+            imageBox.addEventListener('dragover', (e) => {
+              e.preventDefault();
+              imageBox.classList.add('ring-2', 'ring-[#111111]');
+            });
+            imageBox.addEventListener('dragleave', () => {
+              imageBox.classList.remove('ring-2', 'ring-[#111111]');
+            });
+            imageBox.addEventListener('drop', (e) => {
+              e.preventDefault();
+              imageBox.classList.remove('ring-2', 'ring-[#111111]');
+              selectedCell = { rowIndex, colIndex: col.colIndex };
+              const droppedFile = e.dataTransfer?.files?.[0];
+              if (droppedFile && droppedFile.type.startsWith('image/')) {
+                setImageFromFile(droppedFile, rowIndex, col.colIndex);
+              }
+            });
+
+            if (cell.imageData) {
+              const { objectFitClass, transformValue } = getCellImageStyle(cell);
+              const imgEl = document.createElement('img');
+              imgEl.src = cell.imageData;
+              imgEl.alt = `${rowIndex + 1}人目 ${col.label}の画像`;
+              imgEl.className = `w-full h-full ${objectFitClass} pointer-events-none`;
+              imgEl.style.transform = transformValue;
+              imageBox.appendChild(imgEl);
+
+              // 画像調整・削除ボタン（PNG書き出し時は非表示）
+              const imgControls = document.createElement('div');
+              imgControls.className = 'no-export absolute top-1 right-1 flex items-center gap-0.5';
+
+              const btnAdjust = document.createElement('button');
+              btnAdjust.type = 'button';
+              btnAdjust.title = 'ズーム・位置・回転・表示方法を調整';
+              btnAdjust.className =
+                'p-1 rounded-md bg-[#111111]/85 text-white hover:bg-[#111111] transition cursor-pointer';
+              btnAdjust.innerHTML = '<i data-lucide="sliders" class="w-3 h-3"></i>';
+              btnAdjust.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openAdjustModal(rowIndex, col.colIndex);
+              });
+
+              const btnClearImage = document.createElement('button');
+              btnClearImage.type = 'button';
+              btnClearImage.title = '画像を削除';
+              btnClearImage.className =
+                'p-1 rounded-md bg-[#111111]/85 text-white hover:bg-rose-600 transition cursor-pointer';
+              btnClearImage.innerHTML = '<i data-lucide="trash-2" class="w-3 h-3"></i>';
+              btnClearImage.addEventListener('click', (e) => {
+                e.stopPropagation();
+                clearCellImage(rowIndex, col.colIndex);
+              });
+
+              imgControls.appendChild(btnAdjust);
+              imgControls.appendChild(btnClearImage);
+              imageBox.appendChild(imgControls);
+            } else {
+              // 空セルのガイド＆選択ボタン（PNG書き出し時は非表示）
+              const emptyGuide = document.createElement('div');
+              emptyGuide.className =
+                'empty-cell-guide no-export w-full h-full flex flex-col items-center justify-center p-1 text-center gap-1 bg-neutral-50 rounded-lg';
+
+              const statusText = document.createElement('span');
+              statusText.className = 'text-[10px] text-neutral-500 leading-tight';
+              statusText.textContent = isSelected ? '選択中 (Ctrl+V)' : 'クリック / D&D';
+
+              const btnSelectFile = document.createElement('button');
+              btnSelectFile.type = 'button';
+              btnSelectFile.className =
+                'px-1.5 py-0.5 rounded bg-white hover:bg-neutral-100 text-[#111111] border border-neutral-200 text-[10px] font-bold flex items-center gap-0.5 transition cursor-pointer';
+              btnSelectFile.innerHTML = '<i data-lucide="image-plus" class="w-2.5 h-2.5"></i><span>画像</span>';
+              btnSelectFile.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectedCell = { rowIndex, colIndex: col.colIndex };
+                pendingUploadTarget = { rowIndex, colIndex: col.colIndex };
+                filePicker.value = '';
+                filePicker.click();
+              });
+
+              emptyGuide.appendChild(statusText);
+              emptyGuide.appendChild(btnSelectFile);
+              imageBox.appendChild(emptyGuide);
+            }
+
+            // セル下部のテキスト入力欄（名前・メモ・コメント）
+            const captionInput = document.createElement('input');
+            captionInput.type = 'text';
+            captionInput.value = cell.caption || '';
+            captionInput.placeholder = `${col.label}のメモ...`;
+            captionInput.setAttribute('aria-label', `${rowIndex + 1}人目 ${col.label} メモ`);
+            captionInput.className =
+              'export-clean-input w-full text-[11px] font-bold text-[#111111] text-center bg-neutral-50 hover:bg-neutral-100/80 focus:bg-white rounded-md px-1.5 py-1 focus:outline-none transition';
+            captionInput.addEventListener('input', (e) => {
+              appState.rows[rowIndex].cells[col.colIndex].caption = e.target.value;
+            });
+            captionInput.addEventListener('focus', () => {
+              selectedCell = { rowIndex, colIndex: col.colIndex };
+            });
+
+            cellColumn.appendChild(imageBox);
+            cellColumn.appendChild(captionInput);
+            rowGrid.appendChild(cellColumn);
+          });
+
+          // 行の上下移動・削除ボタン（左列を隠さないよう行の右側に配置・書き出し時は非表示）
+          const rowActions = document.createElement('div');
+          rowActions.className = 'w-6 shrink-0 pt-7 flex flex-col items-center gap-0.5 no-export select-none';
+
+          const btnMoveUp = document.createElement('button');
+          btnMoveUp.type = 'button';
+          btnMoveUp.title = '上へ移動';
+          btnMoveUp.disabled = rowIndex === 0;
+          btnMoveUp.className =
+            'p-0.5 rounded text-neutral-500 hover:text-[#111111] hover:bg-neutral-100 disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer';
+          btnMoveUp.innerHTML = '<i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>';
+          btnMoveUp.addEventListener('click', () => movePersonRow(rowIndex, -1));
+
+          const btnMoveDown = document.createElement('button');
+          btnMoveDown.type = 'button';
+          btnMoveDown.title = '下へ移動';
+          btnMoveDown.disabled = rowIndex === appState.rows.length - 1;
+          btnMoveDown.className =
+            'p-0.5 rounded text-neutral-500 hover:text-[#111111] hover:bg-neutral-100 disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer';
+          btnMoveDown.innerHTML = '<i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>';
+          btnMoveDown.addEventListener('click', () => movePersonRow(rowIndex, 1));
+
+          const btnRemoveRow = document.createElement('button');
+          btnRemoveRow.type = 'button';
+          btnRemoveRow.title = 'この行を削除';
+          btnRemoveRow.disabled = appState.rows.length <= 1;
+          btnRemoveRow.className =
+            'p-0.5 rounded text-neutral-500 hover:text-rose-600 hover:bg-rose-50 disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer';
+          btnRemoveRow.innerHTML = '<i data-lucide="x" class="w-3.5 h-3.5"></i>';
+          btnRemoveRow.addEventListener('click', () => removePersonRow(rowIndex));
+
+          rowActions.appendChild(btnMoveUp);
+          rowActions.appendChild(btnMoveDown);
+          rowActions.appendChild(btnRemoveRow);
+
+          rowEl.appendChild(rowGrid);
+          rowEl.appendChild(rowActions);
+          matrixContainer.appendChild(rowEl);
+        });
+
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      } catch (err) {
+        showToast('表の描画中にエラーが発生しました');
+      }
+    }
+
+    /**
+     * 画像ファイルを読み込み対象セルへ反映
+     */
+    function setImageFromFile(file, rowIndex, colIndex) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const targetCell = appState.rows[rowIndex]?.cells[colIndex];
+        if (!targetCell) return;
+        targetCell.imageData = event.target.result;
+        targetCell.fit = 'cover';
+        targetCell.zoom = 100;
+        targetCell.offsetX = 0;
+        targetCell.offsetY = 0;
+        targetCell.rotate = 0;
+        renderMatrix();
+        showToast('画像を配置しました');
+      };
+      reader.onerror = () => {
+        showToast('画像の読み込みに失敗しました');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /**
+     * セルの画像を削除
+     */
+    function clearCellImage(rowIndex, colIndex) {
+      const targetCell = appState.rows[rowIndex]?.cells[colIndex];
+      if (!targetCell) return;
+      targetCell.imageData = null;
+      targetCell.fit = 'cover';
+      targetCell.zoom = 100;
+      targetCell.offsetX = 0;
+      targetCell.offsetY = 0;
+      targetCell.rotate = 0;
+      renderMatrix();
+      showToast('画像を削除しました');
+    }
+
+    /**
+     * 行の追加（1人ずつ・+5人ずつ・上限なし）・上下移動・削除
+     */
+    function addPersonRows(count = 1) {
+      const safeCount = Math.max(1, Number(count) || 1);
+      for (let i = 0; i < safeCount; i++) {
+        appState.rows.push(createPersonRow());
+      }
+      selectedCell = { rowIndex: appState.rows.length - 1, colIndex: 0 };
+      renderMatrix();
+      showToast(`${safeCount}人追加しました（現在 ${appState.rows.length} 人分）`);
+    }
+
+    function movePersonRow(rowIndex, delta) {
+      const nextIndex = rowIndex + delta;
+      if (nextIndex < 0 || nextIndex >= appState.rows.length) return;
+      const temp = appState.rows[rowIndex];
+      appState.rows[rowIndex] = appState.rows[nextIndex];
+      appState.rows[nextIndex] = temp;
+      if (selectedCell.rowIndex === rowIndex) {
+        selectedCell.rowIndex = nextIndex;
+      }
+      renderMatrix();
+    }
+
+    function removePersonRow(rowIndex) {
+      if (appState.rows.length <= 1) return;
+      appState.rows.splice(rowIndex, 1);
+      if (selectedCell.rowIndex >= appState.rows.length) {
+        selectedCell.rowIndex = appState.rows.length - 1;
+      }
+      renderMatrix();
+      showToast('行を削除しました');
+    }
+
+    /**
+     * 画像調整モーダル関連
+     */
+    function openAdjustModal(rowIndex, colIndex) {
+      const cell = appState.rows[rowIndex]?.cells[colIndex];
+      if (!cell || !cell.imageData) return;
+      modalTargetCell = { rowIndex, colIndex };
+      modalDraft = {
+        fit: cell.fit || 'cover',
+        zoom: cell.zoom ?? 100,
+        offsetX: cell.offsetX ?? 0,
+        offsetY: cell.offsetY ?? 0,
+        rotate: cell.rotate ?? 0
+      };
+      modalPreviewImg.src = cell.imageData;
+      syncAdjustModal();
+      adjustModal.classList.remove('hidden');
+      adjustModal.classList.add('flex');
+    }
+
+    function closeAdjustModal() {
+      adjustModal.classList.add('hidden');
+      adjustModal.classList.remove('flex');
+      modalTargetCell = null;
+      modalDraft = null;
+    }
+
+    function syncAdjustModal() {
+      if (!modalDraft) return;
+      rangeZoom.value = modalDraft.zoom;
+      rangeOffsetX.value = modalDraft.offsetX;
+      rangeOffsetY.value = modalDraft.offsetY;
+      rangeRotate.value = modalDraft.rotate;
+
+      labelZoom.textContent = `${modalDraft.zoom}%`;
+      labelOffsetX.textContent = `${modalDraft.offsetX}px`;
+      labelOffsetY.textContent = `${modalDraft.offsetY}px`;
+      labelRotate.textContent = `${modalDraft.rotate}°`;
+
+      document.querySelectorAll('.fit-mode-btn').forEach((btn) => {
+        const isActive = btn.dataset.fitMode === modalDraft.fit;
+        btn.className = `fit-mode-btn py-1.5 px-3 rounded-lg text-xs font-bold transition cursor-pointer ${
+          isActive ? 'bg-[#111111] text-white' : 'text-neutral-600 hover:text-[#111111]'
+        }`;
+      });
+
+      const fitClass = modalDraft.fit === 'contain' ? 'object-contain' : 'object-cover';
+      modalPreviewImg.className = `w-full h-full pointer-events-none origin-center ${fitClass}`;
+      modalPreviewImg.style.transform = `translate(${modalDraft.offsetX}px, ${modalDraft.offsetY}px) scale(${
+        modalDraft.zoom / 100
+      }) rotate(${modalDraft.rotate}deg)`;
+    }
+
+    /**
+     * PNG書き出し（編集用UI・空の「+α」列・完全に空の行・空欄枠を除外して高画質出力）
+     */
+    async function exportTableToPNG() {
+      const btnExport = document.getElementById('btn-export-png');
+      const originalBtnHtml = btnExport.innerHTML;
+      btnExport.disabled = true;
+      btnExport.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>保存中...</span>';
+      if (window.lucide) lucide.createIcons();
+
+      const savedSelected = { ...selectedCell };
+      selectedCell = { rowIndex: -1, colIndex: -1 };
+      renderMatrix();
+
+      // 空欄の「+α」列かどうかを判定（画像もキャプションもすべて空なら書き出し対象から除外）
+      const alphaColIndex = appState.columns.findIndex((c) => c.key === 'alpha');
+      const isAlphaCompletelyEmpty =
+        alphaColIndex !== -1 &&
+        appState.rows.every((r) => {
+          const c = r.cells[alphaColIndex];
+          return !c || (!c.imageData && (!c.caption || c.caption.trim() === ''));
+        });
+
+      if (isAlphaCompletelyEmpty) {
+        captureTarget.querySelectorAll('[data-alpha-col="true"]').forEach((el) => {
+          el.classList.add('export-hide-cell');
+        });
+      }
+
+      // 入力内容が一切ない行は、少なくとも1行以上残る前提で書き出しから除外
+      const nonEmptyRowIndices = appState.rows
+        .map((row, idx) => {
+          const hasContent = row.cells.some(
+            (c) => Boolean(c.imageData) || (c.caption && c.caption.trim() !== '')
+          );
+          return hasContent ? idx : -1;
+        })
+        .filter((idx) => idx !== -1);
+
+      if (nonEmptyRowIndices.length > 0) {
+        captureTarget.querySelectorAll('[data-row-index]').forEach((rowEl) => {
+          const idx = Number(rowEl.dataset.rowIndex);
+          if (!nonEmptyRowIndices.includes(idx)) {
+            rowEl.classList.add('export-hide-cell');
+          }
+        });
+      }
+
+      // 入力中のテキストをDOM属性へ反映
+      captureTarget.querySelectorAll('input[type="text"]').forEach((input) => {
+        input.setAttribute('value', input.value);
+      });
+      captureTarget.querySelectorAll('textarea').forEach((textarea) => {
+        textarea.textContent = textarea.value;
+      });
+
+      captureTarget.classList.add('exporting-mode');
+
+      try {
+        const canvas = await html2canvas(captureTarget, {
+          scale: 2,
+          backgroundColor: '#FFFFFF',
+          useCORS: true
+        });
+
+        const pngUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        const now = new Date();
+        const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(
+          now.getDate()
+        ).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(
+          now.getMinutes()
+        ).padStart(2, '0')}`;
+        link.download = `impression-matrix_${timestamp}.png`;
+        link.href = pngUrl;
+        link.click();
+
+        showToast('PNG画像を保存しました');
+      } catch (err) {
+        showToast('PNG画像の保存に失敗しました');
+      } finally {
+        captureTarget.classList.remove('exporting-mode');
+        captureTarget.querySelectorAll('[data-alpha-col="true"]').forEach((el) => {
+          el.classList.remove('export-hide-cell');
+        });
+        captureTarget.querySelectorAll('[data-row-index]').forEach((el) => {
+          el.classList.remove('export-hide-cell');
+        });
+        selectedCell = savedSelected;
+        renderMatrix();
+        btnExport.disabled = false;
+        btnExport.innerHTML = originalBtnHtml;
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    /**
+     * 各種イベント登録
+     */
+    function registerEvents() {
+      // 行追加（上部・下部 / +1人・+5人）
+      document.getElementById('btn-add-1-top').addEventListener('click', () => addPersonRows(1));
+      document.getElementById('btn-add-5-top').addEventListener('click', () => addPersonRows(5));
+      document.getElementById('btn-add-1-bottom').addEventListener('click', () => addPersonRows(1));
+      document.getElementById('btn-add-5-bottom').addEventListener('click', () => addPersonRows(5));
+
+      // リセット確認モーダル
+      document.getElementById('btn-reset').addEventListener('click', () => {
+        resetModal.classList.remove('hidden');
+        resetModal.classList.add('flex');
+      });
+      document.getElementById('btn-cancel-reset').addEventListener('click', () => {
+        resetModal.classList.add('hidden');
+        resetModal.classList.remove('flex');
+      });
+      document.getElementById('btn-confirm-reset').addEventListener('click', () => {
+        appState = buildInitialState();
+        selectedCell = { rowIndex: 0, colIndex: 0 };
+        resetModal.classList.add('hidden');
+        resetModal.classList.remove('flex');
+        renderMatrix();
+        showToast('初期状態（6人分）にリセットしました');
+      });
+
+      // PNG書き出し
+      document.getElementById('btn-export-png').addEventListener('click', exportTableToPNG);
+
+      // ファイル選択
+      filePicker.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (file && pendingUploadTarget) {
+          setImageFromFile(file, pendingUploadTarget.rowIndex, pendingUploadTarget.colIndex);
+        }
+        pendingUploadTarget = null;
+      });
+
+      // セル選択中の Ctrl+V / Cmd+V 画像貼り付け
+      document.addEventListener('paste', (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+
+        for (const item of items) {
+          if (item.type.startsWith('image/')) {
+            const activeTag = document.activeElement?.tagName?.toLowerCase();
+            if (activeTag === 'input' || activeTag === 'textarea') {
+              e.preventDefault();
+            }
+            const file = item.getAsFile();
+            if (file) {
+              const rIdx = selectedCell.rowIndex >= 0 ? selectedCell.rowIndex : 0;
+              const cIdx = selectedCell.colIndex >= 0 ? selectedCell.colIndex : 0;
+              setImageFromFile(file, rIdx, cIdx);
+            }
+            break;
+          }
+        }
+      });
+
+      // 「今の印象 +α」列・表タイトル・全体メモの表示切替
+      document.getElementById('toggle-alpha-col').addEventListener('change', (e) => {
+        const alphaCol = appState.columns.find((c) => c.key === 'alpha');
+        if (alphaCol) {
+          alphaCol.visible = e.target.checked;
+        }
+        renderMatrix();
+      });
+
+      document.getElementById('toggle-header-title').addEventListener('change', (e) => {
+        appState.showTitle = e.target.checked;
+        renderMatrix();
+      });
+      titleInput.addEventListener('input', (e) => {
+        appState.titleText = e.target.value;
+      });
+
+      document.getElementById('toggle-footer-memo').addEventListener('change', (e) => {
+        appState.showMemo = e.target.checked;
+        renderMatrix();
+      });
+      memoInput.addEventListener('input', (e) => {
+        appState.memoText = e.target.value;
+      });
+
+      // 画像微調整モーダル操作
+      document.getElementById('btn-close-modal').addEventListener('click', closeAdjustModal);
+
+      document.querySelectorAll('.fit-mode-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (!modalDraft) return;
+          modalDraft.fit = btn.dataset.fitMode;
+          syncAdjustModal();
+        });
+      });
+
+      rangeZoom.addEventListener('input', (e) => {
+        if (!modalDraft) return;
+        modalDraft.zoom = Number(e.target.value);
+        syncAdjustModal();
+      });
+
+      rangeOffsetX.addEventListener('input', (e) => {
+        if (!modalDraft) return;
+        modalDraft.offsetX = Number(e.target.value);
+        syncAdjustModal();
+      });
+
+      rangeOffsetY.addEventListener('input', (e) => {
+        if (!modalDraft) return;
+        modalDraft.offsetY = Number(e.target.value);
+        syncAdjustModal();
+      });
+
+      rangeRotate.addEventListener('input', (e) => {
+        if (!modalDraft) return;
+        modalDraft.rotate = Number(e.target.value);
+        syncAdjustModal();
+      });
+
+      document.getElementById('btn-reset-adjust').addEventListener('click', () => {
+        if (!modalDraft) return;
+        modalDraft = { fit: 'cover', zoom: 100, offsetX: 0, offsetY: 0, rotate: 0 };
+        syncAdjustModal();
+      });
+
+      document.getElementById('btn-apply-adjust').addEventListener('click', () => {
+        if (modalTargetCell && modalDraft) {
+          const targetCell = appState.rows[modalTargetCell.rowIndex]?.cells[modalTargetCell.colIndex];
+          if (targetCell) {
+            targetCell.fit = modalDraft.fit;
+            targetCell.zoom = modalDraft.zoom;
+            targetCell.offsetX = modalDraft.offsetX;
+            targetCell.offsetY = modalDraft.offsetY;
+            targetCell.rotate = modalDraft.rotate;
+          }
+        }
+        closeAdjustModal();
+        renderMatrix();
+        showToast('画像の調整を反映しました');
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      registerEvents();
+      renderMatrix();
+    });
+  </script>
+</body>
+</html>
