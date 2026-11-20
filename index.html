@@ -297,16 +297,21 @@
       <div class="bg-neutral-100 rounded-lg p-2 max-h-[60vh] overflow-auto">
         <img id="export-preview-img" alt="作成した比較表のPNG画像" class="block max-w-full h-auto mx-auto" />
       </div>
-      <div class="flex items-center justify-between gap-2 mt-3">
+      <div class="flex items-center justify-between gap-2 mt-3 flex-wrap">
         <button type="button" id="btn-cancel-export" class="px-3 py-2 text-xs font-bold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-lg cursor-pointer">
           閉じる
         </button>
-        <a id="btn-download-png" href="" target="_blank" rel="noopener" download="impression-matrix.png" class="px-4 py-2 text-xs font-bold text-white bg-[#111111] hover:bg-neutral-800 rounded-lg text-center">
-          画像をダウンロード
-        </a>
+        <div class="flex items-center gap-2">
+          <a id="btn-open-png" href="" target="_blank" rel="noopener" class="px-3 py-2 text-xs font-bold text-[#111111] bg-neutral-100 hover:bg-neutral-200 rounded-lg text-center">
+            別タブで開く
+          </a>
+          <a id="btn-download-png" href="" download="impression-matrix.png" class="px-4 py-2 text-xs font-bold text-white bg-[#111111] hover:bg-neutral-800 rounded-lg text-center">
+            画像をダウンロード
+          </a>
+        </div>
       </div>
       <p class="mt-2 text-[11px] text-neutral-500">
-        スマートフォンで保存できない場合は、画像を長押しして「画像を保存」を選んでください。
+        ダウンロードできない場合は「別タブで開く」を押し、画像を長押しして保存してください。
       </p>
     </div>
   </div>
@@ -399,6 +404,7 @@
     const resetModal = document.getElementById('reset-modal');
     const exportModal = document.getElementById('export-modal');
     const exportPreviewImg = document.getElementById('export-preview-img');
+    const openPngLink = document.getElementById('btn-open-png');
     const downloadPngLink = document.getElementById('btn-download-png');
 
     /**
@@ -421,6 +427,7 @@
       exportModal.classList.add('hidden');
       exportModal.classList.remove('flex');
       exportPreviewImg.removeAttribute('src');
+      openPngLink.removeAttribute('href');
       downloadPngLink.removeAttribute('href');
       if (exportImageUrl) {
         URL.revokeObjectURL(exportImageUrl);
@@ -918,6 +925,7 @@
         }
         exportImageUrl = URL.createObjectURL(pngBlob);
         exportPreviewImg.src = exportImageUrl;
+        openPngLink.href = exportImageUrl;
         downloadPngLink.href = exportImageUrl;
         downloadPngLink.download = filename;
         exportModal.classList.remove('hidden');
