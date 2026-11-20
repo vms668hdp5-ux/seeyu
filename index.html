@@ -285,6 +285,32 @@
     </div>
   </div>
 
+  <!-- PNG書き出しプレビュー -->
+  <div id="export-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-3">
+    <div class="bg-white text-[#111111] rounded-gothic-fixed rounded-xl max-w-lg max-h-[90vh] w-full p-4 shadow-2xl overflow-y-auto">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-bold">画像を作成しました</h2>
+        <button type="button" id="btn-close-export-modal" class="p-1 rounded-lg text-neutral-500 hover:bg-neutral-100 cursor-pointer" aria-label="閉じる">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="bg-neutral-100 rounded-lg p-2 max-h-[60vh] overflow-auto">
+        <img id="export-preview-img" alt="作成した比較表のPNG画像" class="block max-w-full h-auto mx-auto" />
+      </div>
+      <div class="flex items-center justify-between gap-2 mt-3">
+        <button type="button" id="btn-cancel-export" class="px-3 py-2 text-xs font-bold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-lg cursor-pointer">
+          閉じる
+        </button>
+        <a id="btn-download-png" href="" target="_blank" rel="noopener" download="impression-matrix.png" class="px-4 py-2 text-xs font-bold text-white bg-[#111111] hover:bg-neutral-800 rounded-lg text-center">
+          画像をダウンロード
+        </a>
+      </div>
+      <p class="mt-2 text-[11px] text-neutral-500">
+        スマートフォンで保存できない場合は、画像を長押しして「画像を保存」を選んでください。
+      </p>
+    </div>
+  </div>
+
   <!-- 画面下部トースト通知 -->
   <div id="toast" class="fixed bottom-4 right-4 bg-[#111111] text-white text-xs font-bold px-3 py-2 rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50">
     <span id="toast-text"></span>
@@ -346,6 +372,7 @@
     let modalTargetCell = null;
     let modalDraft = null;
     let toastTimer = null;
+    let exportImageUrl = null;
 
     // DOM参照
     const captureTarget = document.getElementById('capture-target');
@@ -370,6 +397,9 @@
     const labelRotate = document.getElementById('label-rotate');
 
     const resetModal = document.getElementById('reset-modal');
+    const exportModal = document.getElementById('export-modal');
+    const exportPreviewImg = document.getElementById('export-preview-img');
+    const downloadPngLink = document.getElementById('btn-download-png');
 
     /**
      * トースト通知を表示
@@ -385,6 +415,17 @@
         toastEl.classList.remove('opacity-100');
         toastEl.classList.add('opacity-0');
       }, 2200);
+    }
+
+    function closeExportModal() {
+      exportModal.classList.add('hidden');
+      exportModal.classList.remove('flex');
+      exportPreviewImg.removeAttribute('src');
+      downloadPngLink.removeAttribute('href');
+      if (exportImageUrl) {
+        URL.revokeObjectURL(exportImageUrl);
+        exportImageUrl = null;
+      }
     }
 
     /**
@@ -855,19 +896,34 @@
           useCORS: true
         });
 
-        const pngUrl = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
+        const pngBlob = await new Promise((resolve, reject) => {
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('PNG画像を作成できませんでした'));
+            }
+          }, 'image/png');
+        });
         const now = new Date();
         const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(
           now.getDate()
         ).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(
           now.getMinutes()
         ).padStart(2, '0')}`;
-        link.download = `impression-matrix_${timestamp}.png`;
-        link.href = pngUrl;
-        link.click();
+        const filename = `impression-matrix_${timestamp}.png`;
 
-        showToast('PNG画像を保存しました');
+        if (exportImageUrl) {
+          URL.revokeObjectURL(exportImageUrl);
+        }
+        exportImageUrl = URL.createObjectURL(pngBlob);
+        exportPreviewImg.src = exportImageUrl;
+        downloadPngLink.href = exportImageUrl;
+        downloadPngLink.download = filename;
+        exportModal.classList.remove('hidden');
+        exportModal.classList.add('flex');
+        if (window.lucide) lucide.createIcons();
+        showToast('画像を作成しました。保存ボタンを押してください');
       } catch (err) {
         showToast('PNG画像の保存に失敗しました');
       } finally {
@@ -916,6 +972,8 @@
 
       // PNG書き出し
       document.getElementById('btn-export-png').addEventListener('click', exportTableToPNG);
+      document.getElementById('btn-close-export-modal').addEventListener('click', closeExportModal);
+      document.getElementById('btn-cancel-export').addEventListener('click', closeExportModal);
 
       // ファイル選択
       filePicker.addEventListener('change', (e) => {
